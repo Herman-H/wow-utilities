@@ -1,0 +1,10 @@
+## Interface: 11200
+## Author: Sol
+## Title: Test
+## Notes: Just testing
+## Version: 0.1
+## SavedVariablesPerCharacter: Test_state, Test_comment
+Test.lua
+Test.xml
+TestVendor.lua
+TestVendor.xml

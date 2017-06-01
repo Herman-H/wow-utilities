@@ -1,0 +1,6 @@
+## Interface: 1300
+## Title: Clock
+## Notes: Adds a clock window with time-based tooltip information.  Use << /clock >> or << /clock help >> for a helpful list of commands.
+## SavedVariables: ClockState
+## SavedVariablesPerCharacter: Kills, NQuest0XPAcc, NMob0XPAcc, NQuest1XPAcc, NMob1XPAcc, NQuest4XPAcc, NMob4XPAcc, NQuestAllXPAcc, NMobAllXPAcc, Quest0XPAcc, Mob0XPAcc, Quest1XPAcc, Mob1XPAcc, Quest4XPAcc, Mob4XPAcc, QuestAllXPAcc, MobAllXPAcc, Ptr0, Ptr1, Ptr4
+Clock.xml

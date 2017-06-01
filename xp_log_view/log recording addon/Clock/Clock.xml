@@ -1,0 +1,1068 @@
+<!--
+
+	Clock: a simple in-game clock window
+		copyright 2004 by Telo
+
+	- Displays the time in a small, movable window
+	- Displays time-based character information in a tooltip on mouseover
+
+        TimePlayed 5 min    |Last Hour  |4 Last Hours   |Total
+        Mob XP     mobxp    |mobxp      |mobxp          |mobxp
+        Quest XP   questxp  |questxp    |questxp        |questxp
+        XP Total   totalxp  |totalxp    |totalxp        |totalxp
+        N Mob XP   nmobxp   |nmobxp     |nmobxp         |nmobxp
+        N Quest XP nquestxp |nquestxp   |nquestxp       |nquestxp
+        N Total XP ntotalxp |ntotalxp   |ntotalxp       |ntotalxp
+        Mob/Quest  r        |r          |r              |r
+
+-->
+
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
+	<Script file="Clock.lua"/>
+        <Frame name="ClockFrame" frameStrata="LOW" toplevel="true" enableMouse="false" movable="false" parent="UIParent">
+		<Size>
+                        <AbsDimension x="350" y="195"/>
+		</Size>
+		<Anchors>
+                        <Anchor point="BOTTOMLEFT">
+                            <Offset>
+                                    <AbsDimension x="20" y="500"/>
+                            </Offset>
+                        </Anchor>
+                </Anchors>
+                <!--<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+                        <BackgroundInsets>
+                                <AbsInset left="11" right="12" top="12" bottom="11"/>
+                        </BackgroundInsets>
+                        <TileSize>
+                                <AbsValue val="32"/>
+                        </TileSize>
+                        <EdgeSize>
+                                <AbsValue val="32"/>
+                        </EdgeSize>
+                </Backdrop>-->
+		<Frames>
+                        <Frame name="ClockTextButton" enableMouse="false" movable="false">
+				<Size>
+                                        <AbsDimension x="128" y="12"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-9"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="ClockText" inherits="GameFontNormal" wraponspaces="true">
+							<Size>
+                                                                <AbsDimension x="128" y="24"/>
+							</Size>
+							<Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+						</FontString>
+					</Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="Last5MinHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-9"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="Last5MinHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="LastHourHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-9"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="LastHourHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="Last4HourHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-9"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="Last4HourHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="AllTimeHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-9"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="AllTimeHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="MobXPHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="-35"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="MobXPHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="MobXPLast5MinButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-35"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="MobXPLast5Min" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="MobXPLastHrButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-35"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="MobXPLastHr" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="MobXPLast4HrsButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-35"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="MobXPLast4Hrs" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="MobXPAllTimeButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-35"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="MobXPAllTime" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="QuestXPHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="-55"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="QuestXPHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="QuestXPLast5MinButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-55"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="QuestXPLast5Min" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="QuestXPLastHrButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-55"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="QuestXPLastHr" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="QuestXPLast4HrsButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-55"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="QuestXPLast4Hrs" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="QuestXPAllTimeButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-55"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="QuestXPAllTime" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="TotalXPHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="-75"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="TotalXPHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="TotalXPLast5MinButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-75"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="TotalXPLast5Min" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="TotalXPLastHrButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-75"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="TotalXPLastHr" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="TotalXPLast4HrsButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-75"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="TotalXPLast4Hrs" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="TotalXPAllTimeButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-75"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="TotalXPAllTime" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NMobXPHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="-95"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NMobXPHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NMobXPLast5MinButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-95"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NMobXPLast5Min" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NMobXPLastHrButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-95"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NMobXPLastHr" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NMobXPLast4HrsButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-95"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NMobXPLast4Hrs" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NMobXPAllTimeButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-95"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NMobXPAllTime" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NQuestXPHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="-115"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NQuestXPHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NQuestXPLast5MinButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-115"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NQuestXPLast5Min" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NQuestXPLastHrButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-115"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NQuestXPLastHr" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NQuestXPLast4HrsButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-115"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NQuestXPLast4Hrs" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NQuestXPAllTimeButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-115"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NQuestXPAllTime" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NTotalXPHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="-135"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NTotalXPHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NTotalXPLast5MinButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-135"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NTotalXPLast5Min" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NTotalXPLastHrButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-135"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NTotalXPLastHr" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NTotalXPLast4HrsButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-135"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NTotalXPLast4Hrs" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="NTotalXPAllTimeButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-135"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="NTotalXPAllTime" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="RatioHeaderButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="0" y="-155"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="RatioHeader" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="RatioLast5MinButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="65" y="-155"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="RatioLast5Min" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="RatioLastHrButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="120" y="-155"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="RatioLastHr" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="RatioLast4HrsButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="175" y="-155"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="RatioLast4Hrs" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+                        <Frame name="RatioAllTimeButton" enableMouse="false" movable="false">
+                                <Size>
+                                        <AbsDimension x="128" y="12"/>
+                                </Size>
+                                <Anchors>
+                                        <Anchor point="TOPLEFT">
+                                                <Offset>
+                                                        <AbsDimension x="230" y="-155"/>
+                                                </Offset>
+                                        </Anchor>
+                                </Anchors>
+                                <Layers>
+                                        <Layer level="BACKGROUND">
+                                                <FontString name="RatioAllTime" inherits="GameFontNormal" wraponspaces="true">
+                                                        <Size>
+                                                                <AbsDimension x="128" y="24"/>
+                                                        </Size>
+                                                        <Anchors>
+                                                                <Anchor point="TOPLEFT"/>
+                                                        </Anchors>
+                                                        <Color a="1" r="0" g="1" b="0" />
+                                                </FontString>
+                                        </Layer>
+                                </Layers>
+                        </Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				Clock_OnLoad();
+			</OnLoad>
+			<OnUpdate>
+				Clock_OnUpdate(arg1);
+			</OnUpdate>
+			<OnEvent>
+				Clock_OnEvent();
+			</OnEvent>
+                        <!--<OnDragStart>
+				Clock_OnDragStart();
+			</OnDragStart>
+			<OnDragStop>
+				Clock_OnDragStop();
+                        </OnDragStop>
+			<OnMouseUp>
+				Clock_OnDragStop();
+                        </OnMouseUp>-->
+		</Scripts>
+	</Frame>
+</Ui>

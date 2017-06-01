@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ActionSelecterDialog</class>
+ <widget class="QDialog" name="ActionSelecterDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>233</width>
+    <height>65</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QComboBox" name="typeselecter">
+       <item>
+        <property name="text">
+         <string>Action...</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Pick Up Quest</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Return Quest</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Set Hearthstone</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Use Hearthstone</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Discover Flight Master</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Use Flight Master</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Vendor</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Trainer</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Reach XP Breakpoint</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Comment</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="selectButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Select...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
