@@ -14,7 +14,7 @@ The axis on the right hand side denotes XP gained per hour. This implies that wh
 The colored background shows the zone that the player is currently in. To see which zone you are in, check the top axis.
 
 ### Create a new log
-Install the addon located in "xp_log_view/log recording addons" named "Clock". This addon is an old addon that I added logging functionality to. It will automatically record all XP gains to a file "<WoWFolderPath>/WTF/Account/<AccountName>/<ServerName>/<CharacterName>/SavedVariables/Clock.lua"
+Install the addon located in "xp_log_view/log recording addons" named "Clock". This addon is an old addon that I added logging functionality to. It will automatically record all XP gains to a file "_WoWFolderPath_/WTF/Account/_AccountName_/_ServerName_/_CharacterName_/SavedVariables/Clock.lua"
 
 ## XP Path
 The work on this utility started with the need to chart a "questing route". In order to level in WoW, as fast as possible, it is important to know what to do and in what order. Essentially, you start the game with a plan of what to do. In order to improve on this plan I wanted to have a way of documenting my current progress. So this is the basic functionality of this program; (1) building and viewing a list of what to do and in what order.
