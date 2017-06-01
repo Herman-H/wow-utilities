@@ -24,4 +24,4 @@ The next feature of this program (2), builds on the previous. Since I wanted a w
 Since I'm now connected to a database, I can automatically pull all data associated with each in-game object that I interact with. This means that I can easily generate a game addon (3) that enables me to press a single button in-game to progress through my list of actions, in order. This means that most NPC interactions become very fast.
 
 ### Running the program
-To run this program, you need a CMaNGOS database for WoW 1.12 installed, which means that you also need a DBMS and some Qt drivers.
+To run this program, you need a CMaNGOS database for WoW 1.12 installed, which means that you also need a DBMS and some Qt SQL drivers.
