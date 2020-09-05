@@ -5,6 +5,7 @@
 #include "flightmasterselecter.h"
 #include "xpbreakpointselecter.h"
 #include <QInputDialog>
+#include "banktransactionselecter.h"
 
 ActionSelecterDialog::ActionSelecterDialog(QSqlDatabase &db,QWidget *parent) :
     QDialog(parent),
@@ -87,6 +88,12 @@ void ActionSelecterDialog::on_typeselecter_currentIndexChanged(int index)
         ui->selectButton->setEnabled(true);
         ui->selectButton->setText(QString{"Comment"});
         a.type = action_type::next_comment;
+    }
+    else if(index == 11)
+    {
+        ui->selectButton->setEnabled(true);
+        ui->selectButton->setText(QString{"Bank Transaction"});
+        a.type = action_type::bank_transaction;
     }
 }
 
@@ -230,6 +237,188 @@ void ActionSelecterDialog::on_selectButton_clicked()
             a.vendorName = comment;
             isSelected_ = true;
             ui->selectButton->setText(comment);
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(index == 11)
+    {
+        BankTransactionSelecter selecter{db};
+        selecter.exec();
+        if(selecter.isSelected())
+        {
+            a.bankTransaction = new bank_transaction{selecter.selectedTransaction()};
+            isSelected_ = true;
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+}
+
+void ActionSelecterDialog::edit(action a_)
+{
+    ui->typeselecter->setCurrentIndex(static_cast<int>(a_.type) - 1);
+    a.type = a_.type;
+    if(a_.type == action_type::pick_up_quest || a_.type == action_type::return_quest)
+    {
+        QuestSelecter selecter{db};
+        selecter.setWindowTitle("Select Quest");
+        if(a_.type == action_type::pick_up_quest)
+            selecter.setPickupQuest();
+        else
+            selecter.setReturnQuest();
+        selecter.exec();
+        if(selecter.isSelected())
+        {
+            a.questId = selecter.selectedQuestId();
+            a.itemrewardchoice = selecter.selectedQuestRewardItem();
+            ui->selectButton->setText(QString::number(a.questId));
+            isSelected_ = true;
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::set_hearthstone || a_.type == action_type::use_hearthstone)
+    {
+        hearthstonelocationselecter selecter;
+        selecter.setWindowTitle("Select Hearthstone Location");
+        selecter.exec();
+        if(selecter.isSelected())
+        {
+            a.hs = selecter.selectedLocation();
+            ui->selectButton->setText(hearthstone_location_string(a.hs));
+            isSelected_ = true;
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::discover_flightmaster)
+    {
+        flightmasterSelecter selecter{false};
+        selecter.setWindowTitle("Select Flightmaster");
+        selecter.exec();
+        if(selecter.isSelected())
+        {
+            a.flightmaster = selecter.selectedFlightmaster();
+            ui->selectButton->setText(flightmaster_location_string(a.flightmaster));
+            isSelected_ = true;
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::use_flightmaster)
+    {
+        flightmasterSelecter selecter{true};
+        selecter.setWindowTitle("Select Flight Path");
+        selecter.setFlightmaster(a_.flightmaster);
+        selecter.exec();
+        if(selecter.isSelected() && selecter.isTargetSelected())
+        {
+            a.flightmaster = selecter.selectedFlightmaster();
+            a.flightmaster_target = selecter.selectedTarget();
+            ui->selectButton->setText(flightmaster_location_string(a.flightmaster) + QString{" -> "} +
+                                      flightmaster_location_string(a.flightmaster_target));
+            isSelected_ = true;
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::vendor)
+    {
+        bool ok;
+        QString vendorname = QInputDialog::getText(this, QString{"Specify Vendor Name"},QString{"Vendor Name"},
+                                                   QLineEdit::Normal,a_.vendorName,&ok);
+        if(ok && !vendorname.isEmpty())
+        {
+            a.vendorName = vendorname;
+            isSelected_ = true;
+            ui->selectButton->setText(vendorname);
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::training)
+    {
+        bool ok;
+        QString trainername = QInputDialog::getText(this, QString{"Specify Trainer Name"},QString{"Trainer Name"},
+                                                   QLineEdit::Normal,a_.vendorName,&ok);
+        if(ok && !trainername.isEmpty())
+        {
+            a.vendorName = trainername;
+            isSelected_ = true;
+            ui->selectButton->setText(trainername);
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::reach_xp_breakpoint)
+    {
+        XPBreakpointSelecter selecter;
+        selecter.exec();
+        if(selecter.isSelected())
+        {
+            a.setLevel(selecter.GetLevel());
+            a.setXp(selecter.GetXP());
+            ui->selectButton->setText(QString{"Lvl "} + QString::number(a.getLevel()) + QString{" and "} +
+                                      QString::number(a.getXp()) + QString{" xp"});
+            isSelected_ = true;
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::next_comment)
+    {
+        bool ok;
+        QString comment = QInputDialog::getText(this, QString{"Add Comment"},QString{"Comment"},
+                                                   QLineEdit::Normal,a_.vendorName,&ok);
+        if(ok && !comment.isEmpty())
+        {
+            a.vendorName = comment;
+            isSelected_ = true;
+            ui->selectButton->setText(comment);
+            accept();
+        }
+        else
+        {
+            isSelected_ = false;
+        }
+    }
+    else if(a_.type == action_type::bank_transaction)
+    {
+        BankTransactionSelecter selecter{db};
+        selecter.setTransaction(a_.bankTransaction);
+        selecter.exec();
+        if(selecter.isSelected())
+        {
+            a.bankTransaction = new bank_transaction{selecter.selectedTransaction()};
+            isSelected_ = true;
             accept();
         }
         else

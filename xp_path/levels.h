@@ -68,7 +68,7 @@ struct accumulate_impl<T,VALUE_LIST<SEQ...>>
 };
 
 template <typename T>
-using accumulate = typename accumulate_impl<T,sequence<sizeoflist<T>::value>>::type;
+using accumulate = typename accumulate_impl<T,sequence<sizeoflist<T>::value+1>>::type;
 
 template <unsigned int V>
 struct int_type;
@@ -86,7 +86,7 @@ struct get_element_at_impl<0, T, TS...>
 };
 
 template <unsigned int N, unsigned int ... VS>
-using get_element_at_i = typename detail::get_element_at_impl<N,int_type<VS>...>::type;
+using get_element_at_i = typename get_element_at_impl<N,int_type<VS>...>::type;
 
 typedef VALUE_LIST<
     400,    // 1
@@ -158,17 +158,20 @@ struct values_data;
 template <unsigned int ... XP_PER_LEVEL, unsigned int ... TOTAL_XP_TO_LEVEL>
 struct values_data<VALUE_LIST<XP_PER_LEVEL...>, VALUE_LIST<TOTAL_XP_TO_LEVEL...>>
 {
-    static constexpr unsigned int xp_per_level[] {XP_PER_LEVEL...};
+    const unsigned int xp_per_level[sizeof...(XP_PER_LEVEL)] = {XP_PER_LEVEL...};
+    const unsigned int total_xp_to_level_d[sizeof...(TOTAL_XP_TO_LEVEL)] = {TOTAL_XP_TO_LEVEL...};
 private:
-    static constexpr unsigned int total_xp_to_level_d[] {TOTAL_XP_TO_LEVEL...};
 public:
-    static constexpr unsigned int total_xp_to_level(unsigned int i)
+    constexpr unsigned int total_xp_to_level(unsigned int i)
     {
         return (i <= 60 && i >= 2) ? total_xp_to_level_d[i-1] : 0;
     }
-    static constexpr bool is_correct() { return total_xp_to_level(59) == 4084700; }
+    constexpr bool is_correct() { return total_xp_to_level(59) == 4084700; }
 };
 
 typedef values_data<XP_PER_LEVEL, TOTAL_XP_TO_LEVEL> levels_data;
+
+
+
 
 #endif // LEVELS_H

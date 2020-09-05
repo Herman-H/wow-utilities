@@ -35,6 +35,9 @@ public:
         return target;
     }
 
+    void setFlightmaster(flightmaster_location);
+    void setTarget(flightmaster_location);
+
 private slots:
     void onSelect(int index);
     void onSelectTarget(int index);

@@ -17,7 +17,8 @@ enum class action_type
     vendor,
     training,
     next_comment,
-    reach_xp_breakpoint
+    reach_xp_breakpoint,
+    bank_transaction
 };
 
 
@@ -251,7 +252,7 @@ static QString flightmaster_location_string(flightmaster_location w)
     case flightmaster_location::LightsHopeChapel:
         return QString{"Light\'s Hope Chapel, Eastern Plaguelands"};
     case flightmaster_location::MarshalsRefuge:
-        return QString{"Marhal\'s Refuge, Un\'goro Crater"};
+        return QString{"Marshal\'s Refuge, Un\'goro Crater"};
     case flightmaster_location::Moonglade:
         return QString{"Moonglade"};
     case flightmaster_location::Orgrimmar:
@@ -356,6 +357,139 @@ static QString flightmaster_string(flightmaster_location w)
     return QString{""};
 }
 
+enum class bank_filter_function_to
+{
+    ALL,
+    AT_LEAST_REMAIN
+};
+
+enum class bank_filter_function_from
+{
+    ALL,
+    AT_LEAST_PUSH
+};
+
+static QString bank_filter_function_from_string(bank_filter_function_to t)
+{
+    switch(t)
+    {
+        case bank_filter_function_to::ALL:
+            return QString{"Push all"};
+        case bank_filter_function_to::AT_LEAST_REMAIN:
+            return QString{"Push all but"};
+    }
+}
+static QString bank_filter_function_from_string(bank_filter_function_from t)
+{
+    switch(t)
+    {
+        case bank_filter_function_from::ALL:
+            return QString{"Pull all"};
+        case bank_filter_function_from::AT_LEAST_PUSH:
+            return QString{"Pull at least"};
+    }
+}
+
+
+struct bank_atom_to
+{
+    int                     itemId;
+    bank_filter_function_to to;
+    unsigned int            param;
+};
+struct bank_atom_from
+{
+    int                         itemId;
+    bank_filter_function_from   from;
+    unsigned int                param;
+};
+
+struct bank_transaction
+{
+    QString                     banker_name;
+    std::vector<bank_atom_to>   to_bank;
+    std::vector<bank_atom_from> from_bank;
+
+    /*QString encode() const
+    {
+        QString r{QString::number(banker_name.size())};
+        r.append("|");
+        for(int i = 0; i < banker_name.size(); ++i)
+        {
+            r.append(banker_name[i]);
+        }
+        r.append(QString::number(to_bank.size()));
+        r.append("|");
+        for(int i = 0; i < to_bank.size(); ++i)
+        {
+            r.append(QString::number(to_bank[i].itemId));
+            r.append("|");
+            r.append(QString::number(static_cast<int>(to_bank[i].to)));
+            r.append("|");
+            r.append(QString::number(to_bank[i].param));
+        }
+        r.append("|");
+        r.append(QString::number(from_bank.size()));
+        r.append("|");
+        for(int i = 0; i < from_bank.size(); ++i)
+        {
+            r.append(QString::number(from_bank[i].itemId));
+            r.append("|");
+            r.append(QString::number(static_cast<int>(from_bank[i].from)));
+            r.append("|");
+            r.append(QString::number(from_bank[i].param));
+        }
+        return r;
+    }
+
+    bank_transaction(QString encoded_transaction)
+    {
+        QRegularExpression sizeRegexp{"([%d]+)"};
+        QString nameSizeStr = sizeRegexp.match(encoded_transaction).captured(0);
+        int nameSize = nameSizeStr.toInt();
+
+        banker_name = encoded_transaction.mid(nameSizeStr.size()+1,nameSize);
+
+        int begin_to = nameSizeStr.size()+nameSize+2;
+        QString toSizeStr = sizeRegexp.match(encoded_transaction,begin_to).captured(0);
+        int toSize = toSizeStr.toInt();
+
+        int offset = begin_to + toSizeStr.size() + 1;
+        for(int i = 0; i < toSize; ++i)
+        {
+            QRegularExpression toRegexp{"([%d]+)|([%d]+)|([%d]+)"};
+            auto match = toRegexp.match(encoded_transaction, offset);
+            QString itemIdStr = match.captured(0);
+            QString fnTypeStr = match.captured(1);
+            QString paramStr = match.captured(2);
+            bank_atom_to to;
+            to.itemId = itemIdStr.toInt();
+            to.to = static_cast<bank_filter_function_to>(fnTypeStr.toInt());
+            to.param = paramStr.toInt();
+            to_bank.push_back(to);
+            offset += itemIdStr.size() + fnTypeStr.size() + paramStr.size() + 3;
+        }
+        QString fromSizeStr = sizeRegexp.match(encoded_transaction,offset).captured(0);
+        int fromSize = fromSizeStr.toInt();
+
+        offset += fromSizeStr.size() + 1;
+        for(int i = 0; i < fromSize; ++i)
+        {
+            QRegularExpression fromRegexp{"([%d]+)|([%d]+)|([%d]+)"};
+            auto match = fromRegexp.match(encoded_transaction, offset);
+            QString itemIdStr = match.captured(0);
+            QString fnTypeStr = match.captured(1);
+            QString paramStr = match.captured(2);
+            bank_atom_from from;
+            from.itemId = itemIdStr.toInt();
+            from.from = static_cast<bank_filter_function_from>(fnTypeStr.toInt());
+            from.param = paramStr.toInt();
+            from_bank.push_back(from);
+            offset += itemIdStr.size() + fnTypeStr.size() + paramStr.size() + 3;
+        }
+
+    }*/
+};
 
 struct action
 {
@@ -366,12 +500,72 @@ struct action
     flightmaster_location flightmaster;
     flightmaster_location flightmaster_target;
     QString vendorName;
+    bank_transaction * bankTransaction;
 
     int getLevel() const { return questId; }
     void setLevel(int level) { questId = level; }
     int getXp() const { return itemrewardchoice; }
     void setXp(int xp) { itemrewardchoice = xp; }
 
+    /*QString encode(const action a) const
+    {
+        QString r{QString::number(static_cast<int>(a.type))};
+        r.append("|");
+        r.append(QString::number(a.questId));
+        r.append("|");
+        r.append(QString::number(static_cast<int>(a.hs)));
+        r.append("|");
+        r.append(QString::number(a.itemrewardchoice));
+        r.append("|");
+        r.append(QString::number(static_cast<int>(a.flightmaster)));
+        r.append("|");
+        r.append(QString::number(static_cast<int>(a.flightmaster_target)));
+        r.append("|");
+        r.append(QString::number(a.vendorName.size()));
+        r.append("|");
+        for(int i = 0; i < a.vendorName.size(); ++i)
+        {
+            r.append(a.vendorName[i]);
+        }
+        if(a.bankTransaction)
+        {
+            r.append(a.bankTransaction->encode());
+        }
+        return r;
+    }
+
+    action(QString encoded_action)
+    {
+        QRegularExpression fromRegexp{"([%d]+)|([%d]+)|([%d]+)|([%d]+)|([%d]+)|([%d]+)|([%d]+)"};
+        auto match = fromRegexp.match(encoded_action);
+        QString typeStr = match.captured(0);
+        QString questIdStr = match.captured(1);
+        QString hsStr = match.captured(2);
+        QString itemRewStr = match.captured(3);
+        QString fmStr = match.captured(4);
+        QString fmtStr = match.captured(5);
+        QString vendorNameSizeStr = match.captured(6);
+
+        type = static_cast<action_type>(typeStr.toInt());
+        questId = questIdStr.toInt();
+        hs = static_cast<hearthstone_location>(hsStr.toInt());
+        itemrewardchoice = itemRewStr.toInt();
+        flightmaster = static_cast<flightmaster_location>(fmStr.toInt());
+        flightmaster_target = static_cast<flightmaster_location>(fmtStr.toInt());
+
+        int vendorNameSize = vendorNameSizeStr.toInt();
+
+        int offset = typeStr.size() + questIdStr.size() + hsStr.size() + itemRewStr.size() +
+                fmStr.size() + fmtStr.size() + vendorNameSizeStr.size() + 7;
+
+        vendorName = encoded_action.mid(offset,vendorNameSize);
+
+        offset += vendorNameSize;
+        if(!(offset >= encoded_action.size()))
+        {
+             bankTransaction = new bank_transaction(encoded_action.right(encoded_action.size()-offset));
+        }
+    }*/
 };
 
 static QString actionLabel(action a, questData& d)
@@ -424,8 +618,67 @@ static QString actionLabel(action a, questData& d)
     case action_type::next_comment:
         s.append(a.vendorName);
         break;
+    case action_type::bank_transaction:
+        s.append("Use banker ").append(a.bankTransaction->banker_name).append(" to ");
+        if (a.bankTransaction->to_bank.size() > 0)
+        {
+            s.append("deposit ");
+            for(unsigned int i = 0; i < a.bankTransaction->to_bank.size(); ++i)
+            {
+                bank_atom_to to = a.bankTransaction->to_bank[i];
+                if(to.to == bank_filter_function_to::ALL)
+                {
+                    s.append("all [").append(d.getItemName(to.itemId)).append("]");
+                }
+                else if(to.to == bank_filter_function_to::AT_LEAST_REMAIN)
+                {
+                    s.append("all but ").append(QString::number(to.param));
+                    s.append(" [").append(d.getItemName(to.itemId)).append("]");
+                }
+                if(i != a.bankTransaction->to_bank.size() - 1)
+                {
+                    s.append(", ");
+                }
+                else
+                {
+                    s.append(" to the bank");
+                }
+            }
+            if(a.bankTransaction->from_bank.size() > 0)
+            {
+                s.append(" and ");
+            }
+        }
+        if (a.bankTransaction->from_bank.size() > 0)
+        {
+            s.append("withdraw ");
+            for(unsigned int i = 0; i < a.bankTransaction->from_bank.size(); ++i)
+            {
+                bank_atom_from from = a.bankTransaction->from_bank[i];
+                if(from.from == bank_filter_function_from::ALL)
+                {
+                    s.append("all [").append(d.getItemName(from.itemId)).append("]");
+                }
+                else if(from.from == bank_filter_function_from::AT_LEAST_PUSH)
+                {
+                    s.append("at least ").append(QString::number(from.param));
+                    s.append(" [").append(d.getItemName(from.itemId)).append("]");
+                }
+                if(i != a.bankTransaction->from_bank.size() - 1)
+                {
+                    s.append(", ");
+                }
+                else
+                {
+                    s.append(" from the bank");
+                }
+            }
+        }
+        break;
     }
     return s;
 }
+
+
 
 #endif // ACTION_H

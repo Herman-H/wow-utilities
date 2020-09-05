@@ -17,6 +17,8 @@ struct questEntry
     int         minLvl;
     int         prequestId;
     int         prequestGrp;
+    int         rewMoneyMaxLevel;
+    int         questLevel;
 };
 
 class questData
@@ -114,7 +116,7 @@ public:
 
     QString getItemThatStartsQuest(int questid, bool &hasItemThatStartsQuest)
     {
-        QString q{"SELECT name FROM item_template WHERE startquest = "};
+        QString q{"SELECT name FROM item_template WHERE start_quest = "};
         q.append(QString::number(questid));
 
         QSqlQuery query{db};
@@ -203,7 +205,7 @@ public:
 
     bool insert_quest(int questid)
     {
-        QString queryStr{"SELECT Title,MinLevel,PrevQuestId FROM quest_template WHERE entry = "};
+        QString queryStr{"SELECT Title,MinLevel,PrevQuestId,RewMoneyMaxLevel,QuestLevel FROM quest_template WHERE entry = "};
         queryStr.append(QString::number(questid));
         queryStr.append(";");
 
@@ -216,6 +218,8 @@ public:
         newEntry.questName = "";
         newEntry.prequestId = 0;
         newEntry.prequestGrp = 0;
+        newEntry.rewMoneyMaxLevel = 0;
+        newEntry.questLevel = 1;
 
         bool questExists = false;
 
@@ -224,6 +228,8 @@ public:
             newEntry.questName = query.record().value(0).toString().toStdString();
             newEntry.minLvl = query.record().value(1).toInt();
             newEntry.prequestId = query.record().value(2).toInt();
+            newEntry.rewMoneyMaxLevel = query.record().value(3).toInt();
+            newEntry.questLevel = query.record().value(4).toInt();
             questExists = true;
         }
 
@@ -265,4 +271,3 @@ public:
 };
 
 #endif // QUESTDATA
-

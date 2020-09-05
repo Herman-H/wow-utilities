@@ -31,7 +31,7 @@ itemselecter::~itemselecter()
 
 void itemselecter::on_searchButton_clicked()
 {
-    QString query{"SELECT entry,name,RequiredLevel FROM item_template"};
+    QString query{"SELECT entry,name,required_level FROM item_template"};
     // Set the filter
     QString filter;
     bool isnotfirst = false;

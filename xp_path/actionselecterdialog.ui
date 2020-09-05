@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>233</width>
+    <width>240</width>
     <height>65</height>
    </rect>
   </property>
@@ -71,6 +71,11 @@
        <item>
         <property name="text">
          <string>Comment</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bank Transaction</string>
         </property>
        </item>
       </widget>

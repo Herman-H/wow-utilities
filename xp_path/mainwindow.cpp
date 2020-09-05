@@ -4,13 +4,15 @@
 #include "vendorconditionselecter.h"
 #include "generateaddon.h"
 #include <QFileDialog>
+#include "xprewardviewer.h"
+#include <QDataStream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     db(QSqlDatabase::addDatabase("QMYSQL")),
     d(db),
-    am(d),
+    atm(d),
     working_set(&d),
     completed_set(&d),
     vendordontsellmodel(db,QString{"Minimum"}),
@@ -18,20 +20,33 @@ MainWindow::MainWindow(QWidget *parent) :
     state(&d,&working_set,&completed_set),
     settings("settings.ini",QSettings::IniFormat),
     isSimulationStarted(false),
-    isSimulationEnded(false)
+    isSimulationEnded(false),
+    trainerModels()
 {
     ui->setupUi(this);
     db.setHostName(QString{"127.0.0.1"});
-    db.setDatabaseName(QString{"mangosclassic"});
+    db.setDatabaseName(QString{"vmangos"});
     db.setUserName(QString{"root"});
     db.setPassword(QString{"hummer10"});
     db.open();
 
-    ui->resetSimButton->setEnabled(false);
+    ui->actionTableView->setModel(&atm);
+    ui->actionTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->actionTableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
+    ui->actionTableView->horizontalHeader()->resizeSection(0,40);
+    ui->actionTableView->horizontalHeader()->resizeSection(1,500);
+    ui->actionTableView->horizontalHeader()->resizeSection(2,400);
+    ui->actionTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->actionTableView->verticalHeader()->setDefaultSectionSize(24);
+    ui->actionTableView->horizontalHeader()->setStretchLastSection(true);
+    ui->actionTableView->setDragEnabled(true);
+    ui->actionTableView->viewport()->setAcceptDrops(true);
+    ui->actionTableView->setDropIndicatorShown(true);
 
-    ui->actionListView->setModel(am.getModel());
-    ui->actionListView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->actionListView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->listView->setModel(&atm);
+    ui->listView->setModelColumn(1);
+
+    ui->resetSimButton->setEnabled(false);
     enableRunToSelButton();
 
     ui->workingSetTable->setModel(working_set.getModel());
@@ -44,23 +59,37 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->buyTableView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->buyTableView->setColumnHidden(3,true);
     ui->buyTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->buyTableView->setSizeAdjustPolicy(QAbstractItemView::AdjustToContents);
+    ui->buyTableView->horizontalHeader()->setStretchLastSection(true);
     ui->dontSellTableView->setModel(vendordontsellmodel.getModel());
     ui->dontSellTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->dontSellTableView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->dontSellTableView->setColumnHidden(3,true);
     ui->dontSellTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->dontSellTableView->setSizeAdjustPolicy(QAbstractItemView::AdjustToContents);
+    ui->dontSellTableView->horizontalHeader()->setStretchLastSection(true);
+
+    ui->hearthstoneOutputLabel->setText(hearthstone_location_string(state.getCurrentHearthstoneLocation()));
+    ui->dontSellEditButton->setEnabled(ui->dontSellTableView->selectionModel()->hasSelection());
+    ui->buyEditButton->setEnabled(ui->buyTableView->selectionModel()->hasSelection());
+
+    QList<int> warlockTrainers = {5495};
+    QList<int> tailoringTrainers = {1346,4578};
+    trainerModels.push_back(new trainertablemodel(warlockTrainers, false, db));
+    trainerModels.push_back(new trainertablemodel{tailoringTrainers, true, db});
+
+    ui->warlockTrainerTableView->setModel(trainerModels[0]);
+    ui->tailoringTrainerTableView->setModel(trainerModels[1]);
+    trainertablemodel::initializeView(*(ui->warlockTrainerTableView));
+    trainertablemodel::initializeView(*(ui->tailoringTrainerTableView));
 
     load_actions_data(settings.value("actions_file", "").toString());
     load_buy_data(settings.value("buy_file", "").toString());
     load_sell_data(settings.value("sell_file", "").toString());
+    load_trainer_data(settings.value("trainer_file", "").toString());
 
-    ui->hearthstoneOutputLabel->setText(hearthstone_location_string(state.getCurrentHearthstoneLocation()));
-
-    ui->dontSellEditButton->setEnabled(ui->dontSellTableView->selectionModel()->hasSelection());
-    ui->buyEditButton->setEnabled(ui->buyTableView->selectionModel()->hasSelection());
-
-    QObject::connect(ui->actionListView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(enableRunToSelButton()));
-    QObject::connect(ui->actionListView,SIGNAL(clicked(QModelIndex)),this,SLOT(enableRunToSelButton()));
+    QObject::connect(ui->listView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(enableRunToSelButton()));
+    QObject::connect(ui->listView,SIGNAL(clicked(QModelIndex)),this,SLOT(enableRunToSelButton()));
     QObject::connect(ui->dontSellTableView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(onDontSellSelection()));
     QObject::connect(ui->buyTableView->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),this,SLOT(onBuySelection()));
 
@@ -68,7 +97,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionBuy_List,SIGNAL(triggered(bool)),this,SLOT(loadBuyListFile()));
     QObject::connect(ui->actionSell_List,SIGNAL(triggered(bool)),this,SLOT(loadSellListFile()));
 
-    QObject::connect(ui->actionGenerate_Addon, SIGNAL(triggered(bool)),this,SLOT(onGenerateAddon()));
+    QObject::connect(ui->actionGenerate_Addon, SIGNAL(triggered(bool)),this,SLOT(onGenerateAddon112()));
+    QObject::connect(ui->actionGenerate_Addon_Classic, SIGNAL(triggered(bool)),this,SLOT(onGenerateAddonClassic()));
 }
 
 MainWindow::~MainWindow()
@@ -84,32 +114,47 @@ void MainWindow::on_insertButton_clicked()
     if(selecter.isSelected())
     {
         action a = selecter.getSelectedAction();
-        // Just insert selecter.getSelectedAction()
         int row;
-        if(ui->actionListView->selectionModel()->hasSelection())
+        if(ui->actionTableView->selectionModel()->hasSelection())
         {
-            row = ui->actionListView->currentIndex().row()+1;
+            row = ui->actionTableView->currentIndex().row()+1;
         }
         else
         {
-            row = am.getModel()->rowCount();
+            row = atm.rowCount();
         }
-        am.insertItemOnRow(row,a);
+        atm.insertItemOnRow(row,a);
         on_resetSimButton_clicked(); // The state could have been invalidated at this point, simply reset
+    }
+}
+
+
+void MainWindow::on_editButton_clicked()
+{
+    if(ui->actionTableView->selectionModel()->hasSelection())
+    {
+        ActionSelecterDialog selecter(db);
+        action a = atm.getSelectedAction(ui->actionTableView->currentIndex());
+        selecter.edit(a);
+        if(selecter.isSelected())
+        {
+            int row = ui->actionTableView->currentIndex().row();
+            atm.editItemOnRow(row,selecter.getSelectedAction());
+        }
     }
 }
 
 void MainWindow::on_removeButton_clicked()
 {
-    if(ui->actionListView->selectionModel()->hasSelection())
+    if(ui->actionTableView->selectionModel()->hasSelection())
     {
-        am.getModel()->removeRow(ui->actionListView->currentIndex().row());
+        atm.removeRow(ui->actionTableView->currentIndex().row());
     }
 }
 
 void MainWindow::step()
 {
-    state.executeAction(am.getSelectedAction(simStepIndex));
+    state.executeAction(atm.getSelectedAction(simStepIndex));
 
     // Update state view
     ui->minLevelReqOutputLabel->setText(QString::number(state.getMinLevel()));
@@ -124,17 +169,17 @@ void MainWindow::on_stepSimButton_clicked()
 {
     if(isSimulationStarted)
     {
-        if(!ui->actionListView->selectionModel()->hasSelection())
+        if(!ui->listView->selectionModel()->hasSelection())
             return;
         if(!state.wasLastActionPermitted())
             return;
         if(!isSimulationEnded)
         {
             step();
-            ui->actionListView->setCurrentIndex(simStepIndex);
+            ui->listView->setCurrentIndex(simStepIndex);
             ui->resetSimButton->setEnabled(true);
         }
-        if(simStepIndex.row() < am.getModel()->rowCount() - 1)
+        if(simStepIndex.row() < atm.rowCount() - 1)
         {
             simStepIndex = simStepIndex.sibling(simStepIndex.row()+1,0);
         }
@@ -148,9 +193,9 @@ void MainWindow::on_stepSimButton_clicked()
     }
     else
     {
-        if(am.getModel()->rowCount() == 0)
+        if(atm.rowCount() == 0)
             return;
-        ui->actionListView->setCurrentIndex(simStepIndex = am.getModel()->index(0,0));
+        ui->listView->setCurrentIndex(simStepIndex = atm.index(0,0));
         isSimulationStarted = true;
         on_stepSimButton_clicked();
     }
@@ -209,9 +254,9 @@ void MainWindow::on_resetSimButton_clicked()
 
 void MainWindow::on_runToSelSimButton_clicked()
 {
-    if(ui->actionListView->selectionModel()->hasSelection())
+    if(ui->listView->selectionModel()->hasSelection())
     {
-        QModelIndex i = ui->actionListView->currentIndex();
+        QModelIndex i = ui->listView->currentIndex();
         if(!isSimulationStarted)
         {
             on_stepSimButton_clicked();
@@ -228,8 +273,8 @@ void MainWindow::on_runToSelSimButton_clicked()
 
 void MainWindow::enableRunToSelButton()
 {
-    bool enable = ui->actionListView->selectionModel()->hasSelection();
-    QModelIndex i = ui->actionListView->currentIndex();
+    bool enable = ui->listView->selectionModel()->hasSelection();
+    QModelIndex i = ui->listView->currentIndex();
     enable = enable && (!isSimulationStarted || (isSimulationStarted && simStepIndex.row() < i.row() + 1));
     ui->runToSelSimButton->setEnabled(enable);
 }
@@ -241,7 +286,7 @@ void MainWindow::on_runSimButton_clicked()
         on_stepSimButton_clicked();
     }
 
-    for(int j = am.getModel()->rowCount() - simStepIndex.row(); j != 0; --j)
+    for(int j = atm.rowCount() - simStepIndex.row(); j != 0; --j)
     {
         on_stepSimButton_clicked();
         if(!state.wasLastActionPermitted())
@@ -392,7 +437,7 @@ void MainWindow::load_actions_data(const QString & fileName)
     if(fileName.length() != 0)
     {
         file.setFileName(fileName);
-        am.loadActionsFromFile(file);
+        atm.loadActionsFromFile(file);
     }
 }
 
@@ -406,6 +451,7 @@ void MainWindow::load_buy_data(const QString &fileName)
     }
 }
 
+
 void MainWindow::load_sell_data(const QString &fileName)
 {
     if(fileName.length() != 0)
@@ -413,6 +459,32 @@ void MainWindow::load_sell_data(const QString &fileName)
         file1.setFileName(fileName);
         vendordontsellmodel.loadVendorDataFromFile(file1);
         ui->dontSellTableView->setColumnHidden(3,true);
+    }
+}
+
+void MainWindow::load_trainer_data(const QString &fileName)
+{
+    if(fileName.length() != 0)
+    {
+        file3.setFileName(fileName);
+        auto loader = [this](QFile& file)
+        {
+            QMap<int,QMap<QString,int>> returnValue;
+            file.open(QIODevice::ReadOnly);
+
+            QDataStream in;
+            in.setDevice(&(this->file3));
+            in.setVersion(QDataStream::Qt_5_8);
+            in >> returnValue;
+            file.close();
+
+            return returnValue;
+        };
+        QMap<int,QMap<QString,int>> data = loader(file3);
+        for(int key : data.keys())
+        {
+            trainerModels[key]->load(data.value(key));
+        }
     }
 }
 
@@ -453,7 +525,7 @@ void MainWindow::on_saveActionsButton_clicked()
                                      ,(QFile::exists(file.fileName()))))
     {
         settings.setValue("actions_file",file.fileName());
-        am.saveActionsToFile(file);
+        atm.saveActionsToFile(file);
         qDebug("Save Succeeded");
     }
     else
@@ -492,9 +564,47 @@ void MainWindow::on_dontSellSaveButton_clicked()
     }
 }
 
-void MainWindow::onGenerateAddon()
+void MainWindow::onGenerateAddon112()
 {
-    generateAddon addonGenerator{am,vendordontsellmodel,vendorbuymodel};
+    generateAddon addonGenerator{atm,vendordontsellmodel,vendorbuymodel,trainerModels};
     QString path{"C:/Spel/World of Warcraft 1.12/Interface/AddOns"};
-    addonGenerator.generate(path, "Test", "Sol", "Just testing", "0.1");
+    addonGenerator.generate112(path, "Test", "Sol", "Just testing", "0.1");
+}
+
+void MainWindow::onGenerateAddonClassic()
+{
+    generateAddon addonGenerator{atm,vendordontsellmodel,vendorbuymodel,trainerModels};
+    QString path{"C:/Spel/World of Warcraft 1.12/Interface/AddOns"};
+    addonGenerator.generateClassic("./", "Test", "Sol", "Just testing", "0.1");
+}
+
+void MainWindow::on_viewXpRewardButton_clicked()
+{
+    XpRewardViewer dialog{atm.xpRewardSequence()};
+    dialog.exec();
+}
+
+
+void MainWindow::on_trainerSavePushButton_clicked()
+{
+    if(QFile::exists(file3.fileName()) ? true : (file3.setFileName(QFileDialog::getSaveFileName(this, "Create File"))
+                                     ,(QFile::exists(file3.fileName()))))
+    {
+        QMap<int,QMap<QString,int>> trainerData;
+        trainerData.insert(0, trainerModels[0]->result());
+        trainerData.insert(1, trainerModels[1]->result());
+        settings.setValue("trainer_file",file3.fileName());
+
+        file3.open(QIODevice::WriteOnly);
+        QDataStream out (&file3);
+        out.setVersion(QDataStream::Qt_5_3);
+        out << trainerData;
+        file3.close();
+
+        qDebug("Save Succeeded");
+    }
+    else
+    {
+        qDebug("Save Failed");
+    }
 }

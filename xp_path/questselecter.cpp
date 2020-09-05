@@ -12,10 +12,11 @@ QuestSelecter::QuestSelecter(QSqlDatabase &db,QWidget *parent) :
 {
     ui->setupUi(this);
     QSqlQueryModel * model = new QSqlQueryModel{};
-    model->setQuery(QString{"SELECT entry,Title,MinLevel FROM quest_template"},db);
+    model->setQuery(QString{"SELECT entry,Title,MinLevel,RewMoneyMaxLevel/0.6 FROM quest_template"},db);
     model->setHeaderData(0,Qt::Horizontal,QString{"Entry"});
     model->setHeaderData(1,Qt::Horizontal,QString{"Title"});
     model->setHeaderData(2,Qt::Horizontal,QString{"Minimum Level"});
+    model->setHeaderData(3,Qt::Horizontal,QString{"XP Reward"});
     ui->tableView->setModel(model);
     ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -32,7 +33,7 @@ QuestSelecter::~QuestSelecter()
 
 void QuestSelecter::on_searchPushButton_clicked()
 {
-    QString query{"SELECT entry,Title,MinLevel FROM quest_template"};
+    QString query{"SELECT entry,Title,MinLevel,RewMoneyMaxLevel/0.6 FROM quest_template"};
     // Set the filter
     QString filter;
     bool isnotfirst = false;
@@ -74,6 +75,7 @@ void QuestSelecter::on_searchPushButton_clicked()
     model->setHeaderData(0,Qt::Horizontal,QString{"Entry"});
     model->setHeaderData(1,Qt::Horizontal,QString{"Title"});
     model->setHeaderData(2,Qt::Horizontal,QString{"Minimum Level"});
+    model->setHeaderData(3,Qt::Horizontal,QString{"XP Reward"});
     model->setQuery(query,db);
 }
 

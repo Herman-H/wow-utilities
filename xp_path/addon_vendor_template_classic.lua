@@ -48,7 +48,7 @@ end
 local function hasPetLearnedSpell(spell)
     local i = 1
     while true do
-        local spellName, spellRank = GetSpellName(i, BOOKTYPE_PET)
+        local spellName, spellRank = GetSpellBookItemName(i, BOOKTYPE_PET)
         if not spellName then
             return false;
         end
@@ -72,12 +72,12 @@ local function evaluateCondition(c)
     return vendor_condition[c]();
 end
 
-function @[TitleVendor]_OnLoad()
-    this:RegisterEvent("MERCHANT_SHOW");
-    this:RegisterEvent("MERCHANT_CLOSED");
-    this:RegisterEvent("ITEM_LOCK_CHANGED");
-    this:RegisterEvent("GOSSIP_SHOW");
-    this:RegisterEvent("GOSSIP_CLOSED");
+function @[TitleVendor]_OnLoad(self)
+    self:RegisterEvent("MERCHANT_SHOW");
+    self:RegisterEvent("MERCHANT_CLOSED");
+    self:RegisterEvent("ITEM_LOCK_CHANGED");
+    self:RegisterEvent("GOSSIP_SHOW");
+    self:RegisterEvent("GOSSIP_CLOSED");
 end
 
 local function getBag(str)
@@ -96,7 +96,7 @@ local function getSlot(str)
     end
 end
 
-function @[TitleVendor]_EventHandler(event)
+function @[TitleVendor]_EventHandler(self,event,...)
     if event == "MERCHANT_SHOW" then has_vendor_menu = true;
     elseif event == "MERCHANT_CLOSED" then has_vendor_menu = false;
     elseif event == "GOSSIP_SHOW" then has_gossip_menu = true;
@@ -258,8 +258,13 @@ local function buy()
             local name,_,_,quantity,_,_ = GetMerchantItemInfo(vendorindex);
             if b_buy_count[name] ~= nil then
                 if b_buy_count[name] ~= 0 then
-                    local count = b_buy_count[name] / quantity + bti(math.mod(b_buy_count[name],quantity) ~= 0);
-                    BuyMerchantItem(vendorindex,count);
+                    local count = b_buy_count[name];
+                    local stacksize = GetMerchantItemMaxStack(vendorindex);
+                    while count > 0 do
+                        local amount = math.min(count,stacksize);
+                        BuyMerchantItem(vendorindex,amount);
+                        count = count - amount;
+                    end
                     b_buy_count[name] = 0;
                     b_buy_time[name] = t;
                 end
@@ -273,7 +278,7 @@ local function scanForSells()
     sellOrder = {};
     for bag = 0,4 do
         for slot = 1,GetContainerNumSlots(bag) do
-            local _, count = GetContainerItemInfo(bag, slot);
+            local _, count, _, _, _, _, _, _, noValue = GetContainerItemInfo(bag, slot);
             local link = GetContainerItemLink(bag,slot);
             if link~=nil then
                 local a,b = strfind(link,'%[[^[%]]+');
@@ -289,7 +294,7 @@ local function scanForSells()
                         end
                     elseif b_buy_count[s] ~= nil then
                     elseif couldBeUpgrade(link) then
-                    elseif SellValues and SellValues[s] == 0 then
+                    elseif noValue then
                     else
                         tinsert(sellOrder, {Bag=bag;Slot=slot;});
                     end
@@ -516,6 +521,7 @@ local function triggerSellStateMachine()
         buy();
         sellCompleted = true;
         has_vendor_menu = false;
+        CloseMerchant();
     end
 end
 

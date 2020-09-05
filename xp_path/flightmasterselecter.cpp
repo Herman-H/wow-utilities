@@ -85,3 +85,13 @@ void flightmasterSelecter::onCancel()
     isSelected_ = false;
     isTargetSelected_ = false;
 }
+
+void flightmasterSelecter::setFlightmaster(flightmaster_location loc)
+{
+    fm->setCurrentIndex(static_cast<int>(loc)+1);
+}
+
+void flightmasterSelecter::setTarget(flightmaster_location loc)
+{
+    tar->setCurrentIndex(static_cast<int>(loc)+1);
+}

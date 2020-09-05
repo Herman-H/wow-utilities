@@ -158,7 +158,10 @@ private:
         questdata->get_prequest_group(q.prequestGrp,f);
         p.questNotAlreadyCompleted = completed_quests.find(questId) == completed_quests.end();
         p.questNotPickedUp = quest_working_set.find(questId) == quest_working_set.end();
-        p.prequestCompleted = (q.prequestId == 0) || (completed_quests.find(q.prequestId) != completed_quests.end());
+        p.prequestCompleted =
+                (q.prequestId == 0) ||
+                (completed_quests.find(q.prequestId) != completed_quests.end()) ||
+                (q.prequestId < 0 && quest_working_set.find(-(q.prequestId)) != quest_working_set.end());
         p.canAddToWorkingSet = (quest_working_set.size() < 20);
         bool prequestGrpCompleted = true;
         for(int i : f)
@@ -263,7 +266,12 @@ public:
             lastActionType = action_type::next_comment;
             isActionPermitted_ = true; // its always permitted
             errorMessageHeader = QString{"Next comment..."};
-
+            break;
+        case action_type::bank_transaction:
+            lastActionType = action_type::bank_transaction;
+            isActionPermitted_ = true; // its always permitted
+            errorMessageHeader = QString{"Performed bank transaction."};
+            break;
         }
         return isActionPermitted_;
     }
@@ -333,4 +341,3 @@ public:
 };
 
 #endif // SIMULATION
-

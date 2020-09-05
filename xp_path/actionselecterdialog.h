@@ -27,6 +27,8 @@ public:
         return a;
     }
 
+    void edit(action a_);
+
 private slots:
     void on_typeselecter_currentIndexChanged(int index);
     void on_selectButton_clicked();

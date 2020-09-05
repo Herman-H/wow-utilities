@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -7,6 +7,7 @@
 #include <QSettings>
 
 #include "actionitemmodel.h"
+#include "trainertablemodel.h"
 #include "questsetmodel.h"
 #include "vendorconditionmodel.h"
 
@@ -27,12 +28,14 @@ public:
 
 private slots:
     void on_insertButton_clicked();
+    void on_editButton_clicked();
     void on_removeButton_clicked();
     void on_stepSimButton_clicked();
     void on_resetSimButton_clicked();
     void on_runToSelSimButton_clicked();
     void enableRunToSelButton();
     void on_runSimButton_clicked();
+    void on_viewXpRewardButton_clicked();
 
     void on_dontSellAddButton_clicked();
 
@@ -60,13 +63,16 @@ private slots:
 
     void on_dontSellSaveButton_clicked();
 
-    void onGenerateAddon();
+    void onGenerateAddon112();
+    void onGenerateAddonClassic();
+
+    void on_trainerSavePushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
     QSqlDatabase db;
     questData d;
-    actionitemmodel am;
+    actiontablemodel atm;
     questsetmodel working_set;
     questsetmodel completed_set;
     vendorConditionModel vendordontsellmodel;
@@ -76,6 +82,7 @@ private:
     QFile file;
     QFile file1;
     QFile file2;
+    QFile file3;
 
     bool isSimulationStarted;
     bool isSimulationEnded;
@@ -89,6 +96,14 @@ private:
     void load_actions_data(const QString & fileName);
     void load_sell_data(const QString & fileName);
     void load_buy_data(const QString & fileName);
+    void load_trainer_data(const QString & fileName);
+
+    enum trainerType {
+        WARLOCK,
+        TAILORING
+    };
+
+    std::vector<trainertablemodel*> trainerModels;
 };
 
 #endif // MAINWINDOW_H

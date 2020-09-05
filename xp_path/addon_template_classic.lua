@@ -44,7 +44,7 @@ local function printComment(comment)
 end
 
 local function get_req_xp(value)
-    return math.mod(value,300000);
+    return math.fmod(value,300000);
 end
 
 local function get_req_level(value)
@@ -132,27 +132,26 @@ local function printState(state)
 end
 
 
-function @[Title]_OnLoad()
+function @[Title]_OnLoad(self)
     @[TitleSlashCmd];
     @[TitleSlashCmdRegister];
-    this:RegisterEvent("ADDON_LOADED");
-    this:RegisterEvent("GOSSIP_SHOW");
-    this:RegisterEvent("GOSSIP_CLOSED");
-    this:RegisterEvent("QUEST_PROGRESS");
-    this:RegisterEvent("QUEST_COMPLETE");
-    this:RegisterEvent("QUEST_DETAIL");
-    this:RegisterEvent("QUEST_FINISHED");
-    this:RegisterEvent("QUEST_GREETING");
-    this:RegisterEvent("CONFIRM_BINDER");
-    this:RegisterEvent("TAXIMAP_OPENED");
-    this:RegisterEvent("TAXIMAP_CLOSED");
-    this:RegisterEvent("TRAINER_SHOW");
-    this:RegisterEvent("TRAINER_CLOSED");
-    this:RegisterEvent("TAXIMAP_CLOSED");
-    this:RegisterEvent("CHAT_MSG_SYSTEM");
-    this:RegisterEvent("UI_INFO_MESSAGE");
-    this:RegisterEvent("BANKFRAME_OPENED");
-    this:RegisterEvent("BANKFRAME_CLOSED");
+    self:RegisterEvent("ADDON_LOADED");
+    self:RegisterEvent("GOSSIP_SHOW");
+    self:RegisterEvent("GOSSIP_CLOSED");
+    self:RegisterEvent("QUEST_PROGRESS");
+    self:RegisterEvent("QUEST_COMPLETE");
+    self:RegisterEvent("QUEST_DETAIL");
+    self:RegisterEvent("QUEST_FINISHED");
+    self:RegisterEvent("QUEST_GREETING");
+    self:RegisterEvent("CONFIRM_BINDER");
+    self:RegisterEvent("TAXIMAP_OPENED");
+    self:RegisterEvent("TAXIMAP_CLOSED");
+    self:RegisterEvent("TRAINER_SHOW");
+    self:RegisterEvent("TRAINER_CLOSED");
+    self:RegisterEvent("CHAT_MSG_SYSTEM");
+    self:RegisterEvent("UI_INFO_MESSAGE");
+    self:RegisterEvent("BANKFRAME_OPENED");
+    self:RegisterEvent("BANKFRAME_CLOSED");
     if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("@[Title] was loaded.") end
 end
 
@@ -170,8 +169,8 @@ local function init()
     printState(@[Title]_state);
 end
 
-function @[Title]_EventHandler(event)
-    if event == "ADDON_LOADED" and arg1 == "@[Title]" then
+function @[Title]_EventHandler(self,event,...)
+    if event == "ADDON_LOADED" and select(1,...) == "@[Title]" then
         init();
     elseif event == "GOSSIP_SHOW" then
         @[Title]_gossip_shown = 1;
@@ -207,7 +206,7 @@ function @[Title]_EventHandler(event)
         @[Title]_trainer_menu_shown = 0;
     elseif event == "CHAT_MSG_SYSTEM" then
     elseif event == "UI_INFO_MESSAGE" then
-        if arg1 == ERR_NEWTAXIPATH then
+        if select(2,...) == ERR_NEWTAXIPATH then
             checkIfNextStateForDiscoverFP();
         end
     elseif event == "BANKFRAME_OPENED" then
@@ -218,14 +217,13 @@ function @[Title]_EventHandler(event)
 end
 
 local function selectQuestWithNameGossipX(name,...)
-    local a = 0;
-    for i,v in ipairs(arg) do
-        if math.mod(a,2) == 0 then
-            if name == v then
-                return (a/2) + 1;
+    for i = 1, select('#', ...) do
+        msg = select(i, ...)
+        if math.fmod(i-1,7) == 0 then
+            if name == msg then
+                return (i/7) + 1;
             end
         end
-        a = a + 1;
     end
     return nil;
 end
@@ -270,14 +268,13 @@ local function getQuestFromItem(itemname)
 end
 
 local function returnQuestGossipX(name,...)
-    local a = 0;
-    for i,v in ipairs(arg) do
-        if math.mod(a,2) == 0 then
-            if name == v then
-                return (a/2) + 1;
+    for i = 1, select('#', ...) do
+    	msg = select(i, ...)
+        if math.fmod(i-1,7) == 0 then
+            if name == msg then
+                return (i/7) + 1;
             end
         end
-        a=a+1;
     end
     return nil;
 end
@@ -350,14 +347,14 @@ local function hasQuestInQuestLog(questname)
 end
 
 local function getGossipOption(name,...)
-    local a = 0;
-    for i,v in ipairs(arg) do
-        if math.mod(a,2) == 1 then
-            if v == name then
-                return (a/2) + 1;
+    for i = 1, select('#', ...) do
+    	msg = select(i, ...)
+        if math.fmod(i,2) == 0 then
+            print(msg)
+            if name == msg then
+                return (i/2);
             end
         end
-        a=a+1;
     end
     return nil;
 end
@@ -402,7 +399,8 @@ local function advance()
     local name = names[@[Title]_state];
     local questtitle = questtitles[@[Title]_state];
     if UnitName("target") ~= name and (type ~= 0 or (type == 0 and extra == 0)) then
-        TargetByName(name);
+        --TargetUnit(name);
+        print("Target: " .. name);
         CloseGossip(name);
     end
     if type == 0 then
@@ -460,10 +458,10 @@ tryProgressReturnQuestState = function(name,questname)
         elseif @[Title]_greeted == 1 then
             returnQuestGreeting(questname);
         end
-    elseif @[Title]_quest_progress_shown == 1 then
-        progressQuest(questname);
     elseif @[Title]_quest_completed_shown == 1 then
         completeQuest(questname);
+    elseif @[Title]_quest_progress_shown == 1 then
+        progressQuest(questname);
     end
 end
 
@@ -672,7 +670,6 @@ local function concat_tables(into,from)
     end
 end
 
-
 filterFunctionTo = function(fn,param)
     if fn == 0 then
         return pushAll;
@@ -843,7 +840,6 @@ bankTransaction = function(toList,fromList)
         end
     end
 end
-
 
 function @[Title]_AdvanceX(cmd)
     if cmd == "advance" then

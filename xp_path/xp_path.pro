@@ -7,7 +7,7 @@
 QT       += core gui
 QT       += sql
 
-CONFIG += c++11
+CONFIG += c++17
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -30,7 +30,10 @@ SOURCES += main.cpp\
     vendorconditionselecter.cpp \
     luastatementedit.cpp \
     generateaddon.cpp \
-    xpbreakpointselecter.cpp
+    xpbreakpointselecter.cpp \
+    xprewardviewer.cpp \
+    banktransactionselecter.cpp \
+    trainertablemodel.cpp
 
 HEADERS  += mainwindow.h \
     action.h \
@@ -49,7 +52,10 @@ HEADERS  += mainwindow.h \
     luastatementedit.h \
     generateaddon.h \
     levels.h \
-    xpbreakpointselecter.h
+    xpbreakpointselecter.h \
+    xprewardviewer.h \
+    banktransactionselecter.h \
+    trainertablemodel.h
 
 FORMS    += mainwindow.ui \
     actionselecterdialog.ui \
@@ -60,4 +66,6 @@ FORMS    += mainwindow.ui \
     itemselecter.ui \
     vendorconditionselecter.ui \
     luastatementedit.ui \
-    xpbreakpointselecter.ui
+    xpbreakpointselecter.ui \
+    xprewardviewer.ui \
+    banktransactionselecter.ui
